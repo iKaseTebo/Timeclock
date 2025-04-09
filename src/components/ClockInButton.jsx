@@ -1,9 +1,11 @@
 "use client";
 import { clockIn, clockOut } from "../lib/entries";
+import { useClockContext } from "../context/ClockContext";
 import { useState } from "react";
 import NoteModal from "./NoteModal";
 
 export default function ClockInButton({ activeSession }) {
+    const { triggerRefresh } = useClockContext();
     const [ showNoteModal, setShowNoteModal ] = useState(false);
     const [ note, setNote ] = useState("");
 
@@ -20,6 +22,7 @@ export default function ClockInButton({ activeSession }) {
         await clockOut(note);
         setNote("");
         setShowNoteModal(false);
+        triggerRefresh();
     };
 
     const handleCancel = () => {

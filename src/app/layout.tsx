@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import MainHeader from "../components/MainHeader"
 import "./globals.css";
+import { ClockProvider } from "../context/ClockContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,12 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} bg-black text-white`}>
-          <div id="modal" />
-          <MainHeader />
-          {children}
-      </body>
-    </html>
+    <ClockProvider>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} bg-black text-white`}>
+            <div id="modal" />
+            <MainHeader />
+            {children}
+        </body>
+      </html>
+    </ClockProvider>
   );
 }

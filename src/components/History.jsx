@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
-
+import { useClockContext } from "@/context/ClockContext";
 import DailyHistoryTable from "./HistoryTables/DailyHistoryTable"
 import WeeklyHistoryTable from "./HistoryTables/WeeklyHistoryTable"
 import MonthlyHistoryTable from "./HistoryTables/MonthlyHistoryTable"
@@ -14,46 +14,38 @@ import { get } from "http";
 
 
 export default function History() {
-
+    const { refreshKey } = useClockContext();
     const [filter, setFilter] = useState("Daily");
     const [entries, setEntries] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    const fetchEntries = async (filter) => {
+        setLoading(true);
+        setError(null);
+        try {
+            filter = filter.toLowerCase();
+            const res = await fetch(`/api/entries/${filter}`);
+            if (!res.ok) throw new Error(`Failed to load ${filter} data`);
+            const data = await res.json();
+
+            if ( data.length === 0) {
+                throw new Error("No data returned");
+            }
+
+            setEntries(data);
+        } catch (err) {
+            console.error("Error fetching entries:", err);
+            setError(err.message || "An error occurred while fetching entries.");
+            setEntries([]);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     useEffect(() => {
-        async function fetchData() {
-            setEntries([]);
-            setLoading(true);
-            setError(null);
-        
-            try {
-                let data;
-                switch (filter) {
-                    case "Daily":
-                        data = await getEntriesByDay();
-                        break;
-                    case "Weekly":
-                        data = await getEntriesByWeek();
-                        break;
-                    case "Monthly":
-                        data = await getEntriesByMonth();
-                        break;
-                    default:
-                        data = await getEntriesByDay();
-                        break;
-                }
-                console.log(`Fetched ${filter} data:`, data);  // Debugging the correct data fetch
-                setEntries(data);
-            } catch (err) {
-                setError("Failed to fetch data");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchData();
-    }, [filter]);
+        fetchEntries(filter);
+    }, [filter, refreshKey]);
 
     function renderTable() {
         if (loading) return <div className="text-white">Loading...</div>;
@@ -76,7 +68,7 @@ export default function History() {
 
     return (
         <>
-            <HistoryFilters filter={filter} setEntries={setEntries} setFilter={setFilter}/>  
+            <HistoryFilters filter={filter} setEntries={setEntries} setFilter={setFilter} />  
             {renderTable()}
 
         </>
