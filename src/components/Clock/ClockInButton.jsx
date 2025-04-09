@@ -1,25 +1,27 @@
 "use client";
-import { clockIn, clockOut } from "../lib/entries";
-import { useClockContext } from "../context/ClockContext";
+import { clockInAction, clockOutAction } from "@/actions/clock";
+import { clockIn, clockOut } from "../../lib/entries";
+import { useClockContext } from "../../context/ClockContext";
 import { useState } from "react";
-import NoteModal from "./NoteModal";
+import NoteModal from "../Modal/NoteModal";
 
 export default function ClockInButton({ activeSession }) {
     const { triggerRefresh } = useClockContext();
     const [ showNoteModal, setShowNoteModal ] = useState(false);
     const [ note, setNote ] = useState("");
+    const [ task, setTask ] = useState("");
 
     const handleClick = async () => {
         if (activeSession) {
             setShowNoteModal(true);
         } else {
-            clockIn();
+            await clockInAction();
         }
     }
 
     const handleClockOut  = async (e) => {
         e.preventDefault()
-        await clockOut(note);
+        await clockOutAction(note, task);
         setNote("");
         setShowNoteModal(false);
         triggerRefresh();
@@ -40,6 +42,7 @@ export default function ClockInButton({ activeSession }) {
                 open={showNoteModal}
                 note={note}
                 setNote={setNote}
+                setEntryTask={setTask}
                 onSubmit={handleClockOut}
                 onCancel={handleCancel}
             />

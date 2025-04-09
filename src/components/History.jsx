@@ -1,15 +1,12 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useClockContext } from "@/context/ClockContext";
+
 import DailyHistoryTable from "./HistoryTables/DailyHistoryTable"
 import WeeklyHistoryTable from "./HistoryTables/WeeklyHistoryTable"
 import MonthlyHistoryTable from "./HistoryTables/MonthlyHistoryTable"
-
-import { getEntriesByDay, getEntriesByWeek, getEntriesByMonth } from "../lib/entries";
-// import { useEntries } from "../hooks/useEntries";
-
 import HistoryFilters from "./HistoryFilters";
-import { get } from "http";
+
 
 
 
@@ -51,7 +48,7 @@ export default function History() {
         if (loading) return <div className="text-white">Loading...</div>;
         if (error) return <div className="text-red-500">{error}</div>;
 
-        console.log("Rendering Table with Entries:", entries);  // Debugging the rendering process
+        // console.log("Rendering Table with Entries:", entries);  // Debugging the rendering process
 
         switch (filter) {
             case "Daily":

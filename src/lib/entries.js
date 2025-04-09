@@ -1,7 +1,6 @@
 "use server";
 
 import sql from 'better-sqlite3';
-import { revalidatePath } from 'next/cache';
 
 const db = sql('timeClock.db');
 
@@ -169,13 +168,17 @@ export async function clockIn() {
     `).run(clockInTime);
 }
 
-export async function clockOut(note = "")  {
+export async function clockOut(note = "", task_id = "")  {
     const checkOutTime = new Date().toISOString();
-    db.prepare(`
+    const result = db.prepare(`
         UPDATE entries
-        SET check_out = ?, note = ?
+        SET check_out = ?, note = ?, task_id = ?
         WHERE check_out IS NULL;
-    `).run(checkOutTime, note);
+    `).run(checkOutTime, note, task_id);
 
-    revalidatePath('/');
-};
+    const getEntry = db.prepare(`
+        SELECT * FROM entries WHERE id = ?`);
+
+    return getEntry.get(result.lastInsertRowid);
+
+}

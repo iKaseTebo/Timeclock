@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { timeDifferenceFromNow } from "../util/formatting";
+import { timeDifferenceFromNow } from "../../util/formatting";
 
 export default function CurrentLength({ activeSession }) {
     const [currentLength, setCurrentLength] = useState(activeSession?.check_in ? timeDifferenceFromNow(activeSession.check_in) : "00h 00m 00s");
