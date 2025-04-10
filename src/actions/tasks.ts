@@ -1,6 +1,6 @@
 "use server";
 
-import { CreateNewTask } from '@/lib/tasks';
+import { CreateNewTask, setActiveTask } from '@/lib/tasks';
 
 
 
@@ -21,6 +21,21 @@ export async function NewTaskAction(data: FormData) {
     } catch (error) {
         console.error("Error creating task:", error);
         return {error: "Failed to create task", status: 500};
+    }
+
+}
+
+export async function toggleActiveTask(task: {id: number; active: number}) {
+    "use server";
+
+    if (!task.id) return {error: "Task id is required", success:false, status: 400 };
+
+    try {
+        const response = await setActiveTask(task);
+        return {data: response, success: true, status: 200};
+    } catch (error) {
+        console.error("Error toggling task:", error);
+        return {error: "Failed to toggle task", status: 500};
     }
 
 }

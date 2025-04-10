@@ -11,18 +11,20 @@ export async function getEntries() {
 export async function getEntriesByDay() {
     const rows = db.prepare(`
         SELECT 
-            strftime('%Y-%m-%d', check_in) AS day,
+            strftime('%Y-%m-%d', e.check_in) AS day,
             json_group_array(json_object(
-                'id', id,
-                'check_in', check_in,
-                'check_out', check_out,
-                'note', note,
-                'created_at', created_at
+                'id', e.id,
+                'check_in', e.check_in,
+                'check_out', e.check_out,
+                'note', e.note,
+                'created_at', e.created_at,
+                'task', t.name
             )) AS sessions,
             COUNT(*) AS total_entries,
-            SUM((julianday(check_out) - julianday(check_in)) * 24) AS total_hours
-        FROM entries
-        WHERE check_out IS NOT NULL
+            SUM((julianday(e.check_out) - julianday(e.check_in)) * 24) AS total_hours
+        FROM entries e
+        LEFT JOIN tasks t ON e.task_id = t.id
+        WHERE e.check_out IS NOT NULL
         GROUP BY day
         ORDER BY day DESC
     `).all();
@@ -38,7 +40,7 @@ export async function getEntriesByWeek() {
        SELECT 
             week,
             week_start,
-            SUM(total_hours) AS week_total_hours,  -- Total hours worked in the week
+            SUM(total_hours) AS week_total_hours,
             json_group_array(
                 json_object(
                     'day', day,
@@ -49,23 +51,25 @@ export async function getEntriesByWeek() {
             ) AS daily_sessions
         FROM (
             SELECT 
-                strftime('%Y-%W', check_in) AS week,  -- Year-Week format
-                MIN(strftime('%Y-%m-%d', check_in)) AS week_start,  -- First day of the week
-                strftime('%Y-%m-%d', check_in) AS day,  -- Grouped by day
-                COUNT(*) AS total_entries,  -- Total entries for the day
-                SUM((julianday(check_out) - julianday(check_in)) * 24) AS total_hours,  -- Total hours for the day
+                strftime('%Y-%W', e.check_in) AS week,
+                MIN(strftime('%Y-%m-%d', e.check_in)) AS week_start,
+                strftime('%Y-%m-%d', e.check_in) AS day,
+                COUNT(*) AS total_entries,
+                SUM((julianday(e.check_out) - julianday(e.check_in)) * 24) AS total_hours,
                 json_group_array(
                     json_object(
-                        'id', id,
-                        'check_in', check_in,
-                        'check_out', check_out,
-                        'note', note,
-                        'created_at', created_at
+                        'id', e.id,
+                        'check_in', e.check_in,
+                        'check_out', e.check_out,
+                        'note', e.note,
+                        'created_at', e.created_at,
+                        'task', t.name
                     )
                 ) AS sessions
-            FROM entries
-            WHERE check_out IS NOT NULL
-            GROUP BY day  -- Group by each day
+            FROM entries e
+            LEFT JOIN tasks t ON e.task_id = t.id
+            WHERE e.check_out IS NOT NULL
+            GROUP BY day
         ) AS daily_data
         GROUP BY week
         ORDER BY week DESC;
@@ -83,55 +87,57 @@ export async function getEntriesByWeek() {
 export async function getEntriesByMonth() {
     const rows = db.prepare(`
         SELECT 
-        month,
-        month_start,
-        SUM(week_total_hours) AS month_total_hours,
-        json_group_array(
-            json_object(
-            'week', week,
-            'week_start', week_start,
-            'week_total_hours', week_total_hours,
-            'daily_sessions', daily_sessions
-            )
-        ) AS weekly_sessions
-        FROM (
-        SELECT 
             month,
             month_start,
-            week,
-            week_start,
-            SUM(day_total_hours) AS week_total_hours,
-            json_group_array(
-            json_object(
-                'day', day,
-                'total_entries', total_entries,
-                'total_hours', day_total_hours,
-                'sessions', sessions
-            )
-            ) AS daily_sessions
-        FROM (
-            SELECT 
-            strftime('%Y-%m', check_in) AS month,
-            strftime('%Y-%m-01', check_in) AS month_start,
-            strftime('%Y-%W', check_in) AS week,
-            date(check_in, 'weekday 0', '-6 days') AS week_start, -- get Sunday as start of the week
-            strftime('%Y-%m-%d', check_in) AS day,
-            COUNT(*) AS total_entries,
-            SUM((julianday(check_out) - julianday(check_in)) * 24) AS day_total_hours,
+            SUM(week_total_hours) AS month_total_hours,
             json_group_array(
                 json_object(
-                'id', id,
-                'check_in', check_in,
-                'check_out', check_out,
-                'note', note,
-                'created_at', created_at
+                    'week', week,
+                    'week_start', week_start,
+                    'week_total_hours', week_total_hours,
+                    'daily_sessions', daily_sessions
                 )
-            ) AS sessions
-            FROM entries
-            WHERE check_out IS NOT NULL
-            GROUP BY day
-        ) AS daily_data
-        GROUP BY week
+            ) AS weekly_sessions
+        FROM (
+            SELECT 
+                month,
+                month_start,
+                week,
+                week_start,
+                SUM(day_total_hours) AS week_total_hours,
+                json_group_array(
+                    json_object(
+                        'day', day,
+                        'total_entries', total_entries,
+                        'total_hours', day_total_hours,
+                        'sessions', sessions
+                    )
+                ) AS daily_sessions
+            FROM (
+                SELECT 
+                    strftime('%Y-%m', e.check_in) AS month,
+                    strftime('%Y-%m-01', e.check_in) AS month_start,
+                    strftime('%Y-%W', e.check_in) AS week,
+                    date(e.check_in, 'weekday 0', '-6 days') AS week_start,
+                    strftime('%Y-%m-%d', e.check_in) AS day,
+                    COUNT(*) AS total_entries,
+                    SUM((julianday(e.check_out) - julianday(e.check_in)) * 24) AS day_total_hours,
+                    json_group_array(
+                        json_object(
+                            'id', e.id,
+                            'check_in', e.check_in,
+                            'check_out', e.check_out,
+                            'note', e.note,
+                            'created_at', e.created_at,
+                            'task', t.name
+                        )
+                    ) AS sessions
+                FROM entries e
+                LEFT JOIN tasks t ON e.task_id = t.id
+                WHERE e.check_out IS NOT NULL
+                GROUP BY day
+            ) AS daily_data
+            GROUP BY week
         ) AS weekly_data
         GROUP BY month
         ORDER BY month DESC;

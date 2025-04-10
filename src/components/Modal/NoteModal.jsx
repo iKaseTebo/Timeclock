@@ -12,7 +12,7 @@ export default function NoteModal({ open, note, setNote, setEntryTask, onSubmit,
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch(`/api/tasks`);
+            const res = await fetch(`/api/tasks/active`);
             if (!res.ok) throw new Error(`Failed to fetch Tasks`);
             const data = await res.json();
 
@@ -34,7 +34,7 @@ export default function NoteModal({ open, note, setNote, setEntryTask, onSubmit,
     useEffect(() => {
         fetchTasks();
     }, []);
-    
+
     return (
         <Modal open={open} onClose={onCancel}>
             <form onSubmit={onSubmit} className="space-y-4 p-4">

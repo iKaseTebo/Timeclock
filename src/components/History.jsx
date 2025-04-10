@@ -48,7 +48,7 @@ export default function History() {
         if (loading) return <div className="text-white">Loading...</div>;
         if (error) return <div className="text-red-500">{error}</div>;
 
-        // console.log("Rendering Table with Entries:", entries);  // Debugging the rendering process
+        console.log("Rendering Table with Entries:", entries);  // Debugging the rendering process
 
         switch (filter) {
             case "Daily":

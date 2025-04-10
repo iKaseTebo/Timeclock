@@ -17,7 +17,7 @@ export default function DailyHistoryTable({ entries }) {
             <table className="min-w-full text-white border border-white">
                 <thead>
                     <tr>
-                        <th className="px-4 py-2 border border-white">Date</th>
+                        <th colSpan='2' className="px-4 py-2 border border-white">Date</th>
                         <th className="px-4 py-2 border border-white">Times Clocked In</th>
                         <th className="px-4 py-2 border border-white">Total Time</th>
                         <th className="px-4 py-2 border border-white">Actions</th>
@@ -27,7 +27,7 @@ export default function DailyHistoryTable({ entries }) {
                      {entries?.map((day) => (
                         <Fragment key={day.day}>
                         <tr key={`day${day.day}`} className="hover:bg-zinc-800">
-                            <td className="px-4 border border-white text-gray-200">{day.day}</td>
+                            <td colSpan='2' className="px-4 border border-white text-gray-200">{day.day}</td>
                             <td className="px-4 py-2 border border-white text-gray-200">{day.total_entries}</td>
                             <td className="px-4 py-2 border border-white text-gray-200">{hoursFormatter(day.total_hours)}</td>
                             <td className="px-4 py-2 border border-white text-gray-200 text-center">
@@ -49,6 +49,7 @@ export default function DailyHistoryTable({ entries }) {
                                     <th>Check In</th>
                                     <th>Check Out</th>
                                     <th>Total Hours</th>
+                                    <th>Task</th>
                                     <th>Note</th>
                                 </tr>
                                 {day.sessions.map((session) => (
@@ -56,6 +57,7 @@ export default function DailyHistoryTable({ entries }) {
                                         <td className="px-4 py-2 border border-white text-gray-200">{new Date(session.check_in).toLocaleTimeString()}</td>
                                         <td className="px-4 py-2 border border-white text-gray-200">{new Date(session.check_out).toLocaleTimeString()}</td>
                                         <td className="px-4 py-2 border border-white text-gray-200">{ calculateTotalHours(session.check_in, session.check_out)}</td>
+                                        <td className="px-4 py-2 border border-white text-gray-200">{session.task}</td>
                                         <td className="px-4 py-2 border border-white text-gray-200">{session.note}</td>
                                     </tr>
                                 ))}
