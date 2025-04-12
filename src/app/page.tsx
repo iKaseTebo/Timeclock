@@ -1,17 +1,16 @@
 import ClockCard from "../components/Clock/ClockCard";
 import History from "../components/History";
-import TaskCard from "../components/Tasks/TaskCard";
+// import TaskCard from "../components/Tasks/TaskCard";
 
 export default function Home() {
   return (
     <div >
       <div id="modal"></div>
-      <main className="flex gap-10 px-20 sm:flex-col md:flex-row">
-        <section className="mb-10 flex-1 flex flex-col gap-5">
+      <main className="grid md:grid-cols-12 gap-10 px-20">
+        <section className="mb-10 mt-12 md:col-span-3">
           <ClockCard />
-          <TaskCard />
         </section>
-        <section className="flex-2">
+        <section className="md:col-span-9">
           <History />
 
         </section>

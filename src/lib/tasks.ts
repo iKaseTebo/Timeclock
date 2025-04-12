@@ -46,11 +46,61 @@ export async function setActiveTask(task: {id: number; active: number}) {
 }
 
 export async function getAllTasks(): Promise<Task[]> {
-    const rows = db.prepare(`SELECT * FROM tasks ORDER BY name ASC`).all();
+    const rows = db.prepare(`SELECT * FROM tasks WHERE deleted = 0 ORDER BY name ASC`).all();
     return rows as Task[];
 }
 
 export async function getActiveTasks(): Promise<Task[]> {
-    const rows = db.prepare(`SELECT * FROM tasks WHERE active = 1 ORDER BY name ASC`).all();
+    const rows = db.prepare(`SELECT * FROM tasks WHERE active = 1 AND deleted = 0 ORDER BY name ASC`).all();
     return rows as Task[];
+}
+
+export async function updateTask(task: {id: number; name?: string; description?: string; deleted?: number}) {
+  try {
+    const fields: string[] = [];
+    const values: (string | number)[] = [];
+
+    if ( task.name !== undefined) {
+      fields.push('name = ?');
+      values.push(task.name);
+    }
+    if (task.description !== undefined) {
+      fields.push('description = ?');
+      values.push(task.description);
+    }
+    if (task.deleted !== undefined) {
+      fields.push('deleted = ?');
+      values.push(task.deleted);
+    }
+
+    if (task.id === undefined) {
+      throw new Error('Task ID is required');
+    }
+
+    const query = `UPDATE tasks SET ${fields.join(', ')} WHERE id = ?`;
+    values.push(task.id);
+
+    const stmt = db.prepare(query);
+
+    const result = stmt.run(...values);
+
+    if (result.changes === 0) {
+      throw new Error(`No task found with id ${task.id}`);
+    }
+
+    return {
+      success: true,
+      changes: result.changes,
+      message: 'Task updated successfully'
+    };
+  } catch (error: unknown) {
+    console.error('Error updating task:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred while updating task';
+
+    return {
+      success: false,
+      error: errorMessage || 'Unknown error occurred while updating task'
+    };
+  }
 }

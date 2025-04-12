@@ -1,45 +1,24 @@
-import { getAllTasks } from "@/lib/tasks"
-import ActiveTaskToggle from "@/components/ActiveTaskToggle"
+import { getAllTasks } from "@/lib/tasks";
+import TaskTable from "@/components/Tasks/TaskTable";
+import TaskEdit from "@/components/Tasks/TaskEdit";
+import TaskCard from "@/components/Tasks/TaskCard";
 
 export default async function Tasks() {
-    const tasks = await getAllTasks();
-    // console.log(tasks);
-    return (<>
-        <div className="flex gap-5 p-5 bg-slate rounded-lg shadow-md">
-            <div className="flex-1 border rounded-lg overflow-hidden ">
-                <table className="min-w-full text-white border border-white">
-                    <thead>
-                        <tr >
-                            <th className="px-4 py-2 border border-white">ID</th>
-                            <th className="px-4 py-2 border border-white">Name</th>
-                            <th className="px-4 py-2 border border-white">Description</th>
-                            <th className="px-4 py-2 border border-white">Active</th>
-                            <th className="px-4 py-2 border border-white">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {tasks?.map((task) => (
-                        <tr key={task.id} >
-                            <td className="px-4 border border-white text-gray-200">{task.id}</td>
-                            <td className="px-4 border border-white text-gray-200">{task.name}</td>
-                            <td className="px-4 border border-white text-gray-200">{task.description}</td>
-                            <td className="px-4 border border-white text-gray-200 text-center">
-                                <ActiveTaskToggle task={task} />
-                            </td>
-                            <td className="flex gap-2 px-4 py-2 border border-white text-gray-200 justify-center">
-                                <span className="hover:text-purple-800 cursor-pointer">Edit</span>
-                                <span> - </span>
-                                <span className="text-red-800">Delete</span>
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                    
-                </table>
-            </div>
-            <div className="flex-2 bg-amber-700">
+  const tasks = await getAllTasks();
 
-            </div>
+  return (
+    <>
+      <div className="grid md:grid-cols-12 gap-10 md:gap-5 p-5 bg-slate rounded-lg shadow-md">
+        <div className="md:col-span-2">
+          <TaskCard />
         </div>
-    </>)
+        <div className="md:col-span-8 border rounded-lg overflow-hidden self-start">
+          <TaskTable tasks={tasks} />
+        </div>
+        <div className="md:col-span-2 rounded-lg shadow-md">
+          <TaskEdit tasks={tasks} />
+        </div>
+      </div>
+    </>
+  );
 }

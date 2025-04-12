@@ -27,7 +27,7 @@ export default function MonthlyHistoryTable({ entries }) {
                 <tbody>
                     {entries?.map((month) => (
                         <Fragment key={month.month}>
-                            <tr className="bg-zinc-900 hover:bg-zinc-800">
+                            <tr className=" hover:bg-zinc-800">
                                 <td className="px-4 border border-white text-gray-200">{month.month}</td>
                                 <td className="px-4 py-2 border border-white text-gray-200">{month.month_start}</td>
                                 <td className="px-4 py-2 border border-white text-gray-200">{hoursFormatter(month.month_total_hours)}</td>
@@ -47,7 +47,7 @@ export default function MonthlyHistoryTable({ entries }) {
 
                             {expandedMonth === month.month && (
                                 <>
-                                    <tr className="bg-gray-800 text-purple-300 font-semibold">
+                                    <tr className="bg-zinc-800 font-semibold">
                                         <th colSpan="2" className="px-4 py-2">Week</th>
                                         <th className="px-4 py-2">Total Hours</th>
                                         <th className="px-4 py-2">Actions</th>
@@ -73,7 +73,7 @@ export default function MonthlyHistoryTable({ entries }) {
 
                                             {expandedWeek === week.week && (
                                                 <>
-                                                    <tr className="bg-zinc-700 text-indigo-300 font-medium">
+                                                    <tr className="bg-zinc-700 font-medium">
                                                         <th colSpan="2" className="px-4 py-2">Date</th>
                                                         <th className="px-4 py-2">Total Time</th>
                                                         <th className="px-4 py-2">Actions</th>
