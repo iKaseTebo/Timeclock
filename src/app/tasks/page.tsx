@@ -15,7 +15,7 @@ export default async function Tasks() {
         <div className="col-span-12 lg:col-span-2 rounded-lg shadow-md">
           <TaskEdit tasks={tasks} />
         </div>
-        <div className="lg:col-start-3  col-span-12 lg:col-span-8 min-h-[200px] bg-amber-400"></div>
+        {/* <div className="col-span-12 lg:col-span-10 min-h-[200px] bg-amber-400"></div> */}
       </div>
     </>
   );

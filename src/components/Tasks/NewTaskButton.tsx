@@ -1,9 +1,13 @@
 "use client";
 import NewTaskModal from "../Modal/NewTaskModal";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function NewTaskButton() {
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const pathname = usePathname();
+
+  if (pathname !== "/tasks") return null;
 
   return (
     <>

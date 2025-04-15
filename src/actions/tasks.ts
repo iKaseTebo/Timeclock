@@ -6,7 +6,14 @@ import { AppResponse, UpdateResponse } from "@/types/generic";
 
 export async function NewTaskActionVoid(data: FormData) {
   "use server";
-  NewTaskAction(data); // discard the result
+  const initialState = {
+    success: false,
+    error: undefined,
+    status: undefined,
+    data: undefined,
+  };
+
+  NewTaskAction(initialState, data); // discard the result
 }
 
 export async function NewTaskAction(
