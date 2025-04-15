@@ -1,15 +1,26 @@
 "use server";
+// @ts-expect-error better-sqlite3
+import sql from "better-sqlite3";
+import {
+  Entry,
+  EntryByDayRow,
+  EntryByWeekRow,
+  ParsedEntryByWeekRow,
+  EntryByMonthRow,
+  ParsedEntryByMonthRow,
+  SQLiteRunResult,
+} from "@/types/entries";
 
-import sql from 'better-sqlite3';
-
-const db = sql('timeClock.db');
+const db = sql("timeClock.db");
 
 export async function getEntries() {
-    return db.prepare('SELECT * FROM entries WHERE check_out IS NOT NULL').all();
+  return db.prepare("SELECT * FROM entries WHERE check_out IS NOT NULL").all();
 }
 
 export async function getEntriesByDay() {
-    const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
         SELECT 
             strftime('%Y-%m-%d', e.check_in) AS day,
             json_group_array(json_object(
@@ -27,16 +38,20 @@ export async function getEntriesByDay() {
         WHERE e.check_out IS NOT NULL
         GROUP BY day
         ORDER BY day DESC
-    `).all();
+    `
+    )
+    .all();
 
-    return rows.map(row => ({
-        ...row,
-        sessions: JSON.parse(row.sessions)
-    }));
+  return rows.map((row: EntryByDayRow) => ({
+    ...row,
+    sessions: JSON.parse(row.sessions),
+  }));
 }
 
-export async function getEntriesByWeek() {
-    const rows = db.prepare(`
+export async function getEntriesByWeek(): Promise<ParsedEntryByWeekRow[]> {
+  const rows: EntryByWeekRow[] = db
+    .prepare(
+      `
        SELECT 
             week,
             week_start,
@@ -73,19 +88,25 @@ export async function getEntriesByWeek() {
         ) AS daily_data
         GROUP BY week
         ORDER BY week DESC;
-    `).all();
+    `
+    )
+    .all();
 
-    return rows.map(row => ({
-        ...row,
-        daily_sessions: JSON.parse(row.daily_sessions).map(day => ({
-            ...day,
-            sessions: JSON.parse(day.sessions)
-        }))
-    }));
+  return rows.map((row: EntryByWeekRow) => ({
+    ...row,
+    daily_sessions: JSON.parse(row.daily_sessions).map(
+      (day: EntryByDayRow) => ({
+        ...day,
+        sessions: JSON.parse(day.sessions) as Entry,
+      })
+    ),
+  }));
 }
 
-export async function getEntriesByMonth() {
-    const rows = db.prepare(`
+export async function getEntriesByMonth(): Promise<ParsedEntryByMonthRow[]> {
+  const rows: EntryByMonthRow[] = db
+    .prepare(
+      `
         SELECT 
             month,
             month_start,
@@ -141,50 +162,70 @@ export async function getEntriesByMonth() {
         ) AS weekly_data
         GROUP BY month
         ORDER BY month DESC;
-     `).all();
- 
-     return rows.map(month => ({
-        ...month,
-        weekly_sessions: JSON.parse(month.weekly_sessions).map(week => ({
-          ...week,
-          daily_sessions: JSON.parse(week.daily_sessions).map(day => ({
+     `
+    )
+    .all();
+
+  return rows.map((month) => ({
+    ...month,
+    weekly_sessions: JSON.parse(month.weekly_sessions).map(
+      (week: EntryByWeekRow) => ({
+        ...week,
+        daily_sessions: JSON.parse(week.daily_sessions).map(
+          (day: EntryByDayRow) => ({
             ...day,
-            sessions: JSON.parse(day.sessions)
-          }))
-        }))
-      }));
+            sessions: JSON.parse(day.sessions) as Entry[],
+          })
+        ),
+      })
+    ),
+  }));
 }
 
-export async function getActiveSession() {
-    const activeSession = db.prepare(`
+export async function getActiveSession(): Promise<Entry | null> {
+  const activeSession = db
+    .prepare(
+      `
         SELECT * FROM entries
         WHERE check_out IS NULL
         ORDER BY check_in DESC
         LIMIT 1
-    `).get();
+    `
+    )
+    .get() as Entry | undefined;
 
-    return activeSession || null;
+  return activeSession || null;
 }
 
-export async function clockIn() {
-    const clockInTime = new Date().toISOString();
-    return db.prepare(`
+export async function clockIn(): Promise<SQLiteRunResult> {
+  const clockInTime = new Date().toISOString();
+  return db
+    .prepare(
+      `
         INSERT INTO entries (check_in)
         VALUES (?)
-    `).run(clockInTime);
+    `
+    )
+    .run(clockInTime) as SQLiteRunResult;
 }
 
-export async function clockOut(note = "", task_id = "")  {
-    const checkOutTime = new Date().toISOString();
-    const result = db.prepare(`
+export async function clockOut({
+  note = "",
+  task_id = 0,
+}: Pick<Entry, "note" | "task_id">): Promise<Entry | undefined> {
+  const checkOutTime = new Date().toISOString();
+  const result = db
+    .prepare(
+      `
         UPDATE entries
         SET check_out = ?, note = ?, task_id = ?
         WHERE check_out IS NULL;
-    `).run(checkOutTime, note, task_id);
+    `
+    )
+    .run(checkOutTime, note, task_id);
 
-    const getEntry = db.prepare(`
+  const getEntry = db.prepare(`
         SELECT * FROM entries WHERE id = ?`);
 
-    return getEntry.get(result.lastInsertRowid);
-
+  return getEntry.get(result.lastInsertRowid) as Entry | undefined;
 }

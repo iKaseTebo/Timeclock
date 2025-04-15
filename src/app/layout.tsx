@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import MainHeader from "../components/MainHeader"
+import MainHeader from "../components/MainHeader";
 import "./globals.css";
-import { ClockProvider } from "../context/ClockContext";
+import Providers from "@/components/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,14 +25,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClockProvider>
+    <Providers>
       <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} bg-black text-white`}>
-            <div id="modal" />
-            <MainHeader />
-            {children}
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} bg-black text-white`}
+        >
+          <div id="modal"></div>
+          <MainHeader />
+          {children}
         </body>
       </html>
-    </ClockProvider>
+    </Providers>
   );
 }
