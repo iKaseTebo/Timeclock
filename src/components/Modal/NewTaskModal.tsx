@@ -14,8 +14,7 @@ export default function NewTaskModal({
 }: NewTaskModalProps) {
   return (
     <Modal open={open} onClose={onCancel}>
-      <TaskCard />
-      {/* <h1>Hello</h1> */}
+      <TaskCard onSuccess={onCancel} />
     </Modal>
   );
 }

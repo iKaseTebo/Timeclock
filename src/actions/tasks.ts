@@ -9,7 +9,20 @@ export async function NewTaskActionVoid(data: FormData) {
   NewTaskAction(data); // discard the result
 }
 
-export async function NewTaskAction(data: FormData) {
+export async function NewTaskAction(
+  prevState: {
+    success: boolean;
+    error?: string;
+    status?: number;
+    data?: unknown;
+  },
+  data: FormData
+): Promise<{
+  success: boolean;
+  error?: string;
+  status?: number;
+  data?: unknown;
+}> {
   "use server";
 
   if (!data.get("name"))
@@ -31,7 +44,7 @@ export async function NewTaskAction(data: FormData) {
     return { data: response, success: true, status: 200 };
   } catch (error) {
     console.error("Error creating task:", error);
-    return { error: "Failed to create task", status: 500 };
+    return { error: "Failed to create task", success: false, status: 500 };
   }
 }
 

@@ -1,12 +1,34 @@
-import { NewTaskActionVoid } from "@/actions/tasks";
+"use client";
+import { NewTaskAction } from "@/actions/tasks";
 import SubmitButton from "../UI/SubmitButton";
-export default function TaskCard() {
+import { useFormState } from "react-dom";
+
+export default function TaskCard({ onSuccess }: { onSuccess: () => void }) {
   // console.log(tasks);
+  const initialState = {
+    success: false,
+    error: undefined,
+    status: undefined,
+    data: undefined,
+  };
+  const [state, formAction] = useFormState(NewTaskAction, initialState);
+
+  if (state.success) {
+    onSuccess();
+  }
 
   return (
     <div className="p-4 md:min-h-[400px] flex:sm flex-col">
-      <h2 className="text-3xl mb-4">New Task</h2>
-      <form action={NewTaskActionVoid}>
+      <div className="flex justify-between">
+        <h2 className="text-3xl mb-4">New Task</h2>
+        <p
+          onClick={onSuccess}
+          className="text-xl cursor-pointer font-semibold hover:text-purple-500"
+        >
+          x
+        </p>
+      </div>
+      <form action={formAction}>
         <div>
           <label htmlFor="name" className="block font-semibold mb-1">
             Task Name
