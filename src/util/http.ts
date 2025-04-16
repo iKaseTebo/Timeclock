@@ -31,3 +31,33 @@ export async function fetchEntries({
 
   return data;
 }
+
+export async function fetchTaskEntries({
+  signal,
+  taskId,
+}: {
+  signal?: AbortSignal;
+  taskId: number;
+}) {
+  const url = `http://localhost:3000/api/entries/tasks/${taskId}`;
+
+  const res = await fetch(url, { signal });
+
+  if (!res.ok) {
+    const error = new Error(`Failed to load ${taskId} data`) as Error & {
+      code?: number;
+      info?: unknown;
+    };
+    error.code = res.status;
+    error.info = await res.json();
+    throw error;
+  }
+
+  const data = await res.json();
+
+  if (data.length === 0) {
+    throw new Error("No data returned");
+  }
+
+  return data;
+}

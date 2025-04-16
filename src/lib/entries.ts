@@ -182,6 +182,38 @@ export async function getEntriesByMonth(): Promise<ParsedEntryByMonthRow[]> {
   }));
 }
 
+export async function getEntriesByTask(taskId: number) {
+  try {
+    const rows = db
+      .prepare(
+        `
+      SELECT 
+        e.id,
+        e.check_in,
+        e.check_out,
+        e.note,
+        e.created_at,
+        e.task_id,
+        t.name as task_name,
+        t.description as task_description,
+        t.active,
+        t.deleted
+      FROM entries e
+      JOIN tasks t ON e.task_id = t.id
+      WHERE e.check_out IS NOT NULL AND e.task_id = ?
+      ORDER BY e.check_in DESC
+    `
+      )
+      .all(taskId);
+
+    console.log("getEntriesByTask", rows);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching entries by task:", error);
+    return [];
+  }
+}
+
 export async function getActiveSession(): Promise<Entry | null> {
   const activeSession = db
     .prepare(

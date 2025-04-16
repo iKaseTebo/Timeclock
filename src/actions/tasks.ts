@@ -48,6 +48,7 @@ export async function NewTaskAction(
 
   try {
     const response = await CreateNewTask(task);
+    console.log("Task created:", response);
     return { data: response, success: true, status: 200 };
   } catch (error) {
     console.error("Error creating task:", error);

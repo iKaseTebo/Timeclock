@@ -9,6 +9,10 @@ export default function NewTaskButton() {
 
   if (pathname !== "/tasks") return null;
 
+  function closeModal() {
+    setShowNewTaskModal(false);
+  }
+
   return (
     <>
       <button
@@ -17,10 +21,7 @@ export default function NewTaskButton() {
       >
         NEW TASK
       </button>
-      <NewTaskModal
-        open={showNewTaskModal}
-        onCancel={() => setShowNewTaskModal(false)}
-      />
+      <NewTaskModal open={showNewTaskModal} onCancel={closeModal} />
     </>
   );
 }

@@ -51,6 +51,19 @@ export type ParsedEntryByMonthRow = Omit<EntryByMonthRow, "weekly_sessions"> & {
   weekly_sessions: ParsedEntryByWeekRow[];
 };
 
+export type EntryWithTask = {
+  id: number;
+  check_in: string;
+  check_out: string;
+  note: string;
+  created_at: string;
+  task_id: number;
+  task_name: string;
+  task_description: string;
+  active: number;
+  deleted: number;
+};
+
 // Sql Result Structure
 export type SQLiteRunResult = {
   changes: number;

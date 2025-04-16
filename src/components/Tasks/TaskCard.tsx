@@ -1,7 +1,7 @@
 "use client";
 import { NewTaskAction } from "@/actions/tasks";
 import SubmitButton from "../UI/SubmitButton";
-import { useFormState } from "react-dom";
+import { useActionState, useEffect } from "react";
 
 export default function TaskCard({ onSuccess }: { onSuccess: () => void }) {
   // console.log(tasks);
@@ -11,14 +11,23 @@ export default function TaskCard({ onSuccess }: { onSuccess: () => void }) {
     status: undefined,
     data: undefined,
   };
-  const [state, formAction] = useFormState(NewTaskAction, initialState);
+  const [state, formAction] = useActionState(NewTaskAction, initialState);
 
-  if (state.success) {
-    onSuccess();
-  }
+  useEffect(() => {
+    if (state.success) {
+      onSuccess();
+    }
+  }, [state.success, onSuccess]);
+
+  useEffect(() => {
+    if (state?.error) {
+      console.error("Error:", state.error);
+    }
+  }, [state]);
 
   return (
     <div className="p-4 md:min-h-[400px] flex:sm flex-col">
+      {state?.error && <p className="text-red-500 mt-2">{state.error}</p>}
       <div className="flex justify-between">
         <h2 className="text-3xl mb-4">New Task</h2>
         <p
