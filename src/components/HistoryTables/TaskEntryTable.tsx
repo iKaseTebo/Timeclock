@@ -23,9 +23,9 @@ export default function TaskEntryTable() {
   });
 
   if (!taskId) return null;
+  if (isLoading) return <div className="text-white">Loading...</div>;
   if (entries.length === 0)
     return <div className="text-center text-white">No entries</div>;
-  if (isLoading) return <div className="text-white">Loading...</div>;
   if (error) return <div className="text-red-500">{error.message}</div>;
 
   console.log("entries", entries);
